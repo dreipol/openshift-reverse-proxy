@@ -1,1 +1,2 @@
-envsubst < /config.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'
+#!/usr/bin/env bash
+envsubst < nginx.template > nginx.conf && exec nginx -g 'daemon off;'
