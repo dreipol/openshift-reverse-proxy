@@ -5,6 +5,7 @@ COPY default.conf /etc/nginx/conf.d/
 RUN mkdir /nginx
 COPY nginx.template /nginx/nginx.template
 COPY start.sh /nginx/start.sh
+RUN chmod 777 -R /nginx
 WORKDIR /nginx
 EXPOSE 5000
 CMD ["/bin/sh", "-e", "start.sh"]
