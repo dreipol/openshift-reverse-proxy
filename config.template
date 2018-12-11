@@ -1,0 +1,7 @@
+server {
+    listen       5000;
+    server_name  localhost;
+    location /${STATICFILES_LOCATION} {
+      proxy_pass http://${MINIO_HOST}:${MINIO_PORT}/${BUCKET_NAME}/${STATICFILES_LOCATION};
+    }
+}
