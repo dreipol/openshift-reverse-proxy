@@ -30,4 +30,7 @@ server {
     location /${MEDIAFILES_LOCATION} {
       proxy_pass http://${MINIO_HOST}:${MINIO_PORT}/${BUCKET_NAME}/${MEDIAFILES_LOCATION};
     }
+    location /${SECUREFILES_LOCATION} {
+      proxy_pass http://${MINIO_HOST}:${MINIO_PORT}/${BUCKET_NAME}/${SECUREFILES_LOCATION};
+    }
 }
