@@ -21,10 +21,10 @@ server {
     location / {
         proxy_pass  http://${SERVICE};
     }
-    location ${STATICFILES_LOCATION} {
+    location /${STATICFILES_LOCATION} {
       proxy_pass http://${MINIO_HOST}:${MINIO_PORT}/${BUCKET_NAME}/${STATICFILES_LOCATION};
     }
-    location ${MEDIAFILES_LOCATION} {
+    location /${MEDIAFILES_LOCATION} {
       proxy_pass http://${MINIO_HOST}:${MINIO_PORT}/${BUCKET_NAME}/${MEDIAFILES_LOCATION};
     }
 }
