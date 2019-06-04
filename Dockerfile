@@ -1,4 +1,4 @@
-FROM nginxinc/nginx-unprivileged:1.15.5
+FROM nginxinc/nginx-unprivileged:1.15.12
 USER 0
 RUN rm -f /etc/nginx/conf.d/default.conf
 COPY default.conf /etc/nginx/conf.d/
