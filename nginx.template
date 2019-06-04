@@ -26,6 +26,10 @@ server {
 
     client_max_body_size 64M;
 
+    location ~ /.well-known {
+        return 200 "OK";
+    }
+
     location / {
         proxy_pass  http://${SERVICE};
     }
