@@ -1,0 +1,63 @@
+name: Deploy
+
+on:
+  release:
+    types: 
+      - created
+
+env:
+  GCR_IMAGE: gcr.io/dreipol-d2329/${{github.repository}}
+  ASPECTRA_REGISTRY: registry.acp.aspectra.com
+  ASPECTRA_TAG: latest
+  PROJECT_NAME: openshift-reverse-proxy
+  OPENSHIFT_HOST: https://acp-console.aspectra.com
+  OPENSHIFT_PROJECT: dre-hosting-prod
+  ASPECTRA_PROJECT_NAME_PROD: reverse-proxy
+  ASPECTRA_IMAGE_PROD: registry.acp.aspectra.com/dre-hosting-prod/reverse-proxy
+
+jobs:
+  notify-slack:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: dreipol/github-actions/slugify@master
+    - name: Notify build started
+      uses: dreipol/github-actions/slack@master
+      env:
+        SLACK_WEBHOOK: ${{secrets.SLACK_WEBHOOK}}
+        TEXT: ':hourglass_flowing_sand: Deployment for ${GITHUB_REPOSITORY} ${GITHUB_REF_SLUG}
+          started. <https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}|
+          Check the progress on github>'
+
+  deploy-prod:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: dreipol/github-actions/slugify@master
+    - uses: dreipol/github-actions/deploy@master
+      env:
+        GCP_SERVICEACCOUNT_KEY: ${{ secrets.GCP_SERVICEACCOUNT_KEY }}
+        OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+        OPENSHIFT_USER: ${{ secrets.OPENSHIFT_USER }}
+        DEPLOY_IMAGE: ${{ env.ASPECTRA_IMAGE_PROD }}
+
+    - uses: dreipol/github-actions/deployment-status-reverse-proxy@master
+      env:
+        OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+
+    - name: Notify deployment success
+      if: success()
+      uses: dreipol/github-actions/slack@master
+      env:
+        ENVIRONMENT: ${{env.GITHUB_REF_SLUG}}
+        SLACK_WEBHOOK: ${{secrets.SLACK_WEBHOOK}}
+        TEXT: ':rocket: Deployment for ${GITHUB_REPOSITORY} ${GITHUB_REF_SLUG} successful!'
+
+    - name: Notify deployment failure
+      if: failure()
+      uses: dreipol/github-actions/slack@master
+      env:
+        ENVIRONMENT: ${{env.GITHUB_REF_SLUG}}
+        SLACK_WEBHOOK: ${{secrets.SLACK_WEBHOOK}}
+        TEXT: ':boom: Deployment for ${GITHUB_REPOSITORY} ${GITHUB_REF_SLUG} failed.
+          <${OPENSHIFT_HOST}/console/project/${OPENSHIFT_PROJECT}/browse/dc/${ASPECTRA_PROJECT_NAME_PROD}
+          | Check the logs on Openshift>'

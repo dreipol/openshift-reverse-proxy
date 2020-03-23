@@ -1,0 +1,51 @@
+name: CI
+
+on:
+- push
+
+env:
+  GCR_IMAGE: gcr.io/dreipol-d2329/${{github.repository}}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dreipol/github-actions/slugify@master
+
+    - uses: dreipol/github-actions/set-logs-url@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        JOB_NAME: build
+
+    - name: Docker Build
+      uses: dreipol/github-actions/build@master
+      env:
+        GCP_SERVICEACCOUNT_KEY: ${{ secrets.GCP_SERVICEACCOUNT_KEY }}
+
+    - name: Test Connection
+      run: | 
+        docker network create --driver bridge testnet
+        docker run -d --rm -p 8080:8080 --network testnet --name webserver busybox sh -c "while true; do { echo -e 'HTTP/1.1 200 OK\r\n'; echo 'Hello World'; } | nc -l -p  8080; done"
+        docker run --rm --network testnet -e SERVICE="webserver:8080" -e STATICFILES_LOCATION=static -e SECUREFILES_LOCATION=secure -e MEDIAFILES_LOCATION=media -e MINIO_HOST=127.0.0.1 -e MINIO_PORT=1337 -e BUCKET_NAME=test $GCR_IMAGE:$GITHUB_SHA /bin/sh -e test.sh
+        docker run -d --rm -p 5000:5000 --network testnet --name nginx -e SERVICE="webserver:8080" -e STATICFILES_LOCATION=static -e SECUREFILES_LOCATION=secure -e MEDIAFILES_LOCATION=media -e MINIO_HOST=127.0.0.1 -e MINIO_PORT=1337 -e BUCKET_NAME=test $GCR_IMAGE:$GITHUB_SHA
+        sleep 5
+        curl --fail --silent --show-error localhost:5000
+        docker kill nginx && docker kill webserver
+
+    - name: Push Image
+      uses: dreipol/github-actions/push@master
+      env:
+        GCP_SERVICEACCOUNT_KEY: ${{ secrets.GCP_SERVICEACCOUNT_KEY }}
+
+    - name: Notify build failure
+      if: failure() && (github.ref == 'refs/heads/stage' || github.ref == 'refs/heads/master')
+      uses: dreipol/github-actions/slack@master
+      env:
+        ENVIRONMENT: ${{env.GITHUB_REF_SLUG}}
+        SLACK_WEBHOOK: ${{secrets.SLACK_WEBHOOK}}
+        TEXT: ':boom: Build for ${GITHUB_REPOSITORY} ${GITHUB_REF_SLUG} failed. <https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}|
+          Check the interactive logs on github>. <$DREIPOL_LOGS_URL | Or check the
+          raw logs>'
+
