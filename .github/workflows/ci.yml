@@ -79,6 +79,10 @@ jobs:
     if: github.event_name == 'release'
     steps:
       - uses: dreipol/github-actions/slugify@master
+      - uses: dreipol/github-actions/set-logs-url@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_NAME: deploy-prod
       - uses: dreipol/github-actions/deploy@master
         env:
           GCP_SERVICEACCOUNT_KEY: ${{ secrets.GCP_SERVICEACCOUNT_KEY }}
@@ -105,6 +109,6 @@ jobs:
           ENVIRONMENT: ${{env.GITHUB_REF_SLUG}}
           SLACK_WEBHOOK: ${{secrets.SLACK_WEBHOOK}}
           TEXT: ':boom: Deployment for ${GITHUB_REPOSITORY} ${GITHUB_REF_SLUG} failed.
-          <${OPENSHIFT_HOST}/console/project/${OPENSHIFT_PROJECT}/browse/dc/${ASPECTRA_PROJECT_NAME_PROD}
-          | Check the logs on Openshift>'
+          <https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}| Check the interactive logs on github>.
+          <$DREIPOL_LOGS_URL | Or check the raw logs>''
 
