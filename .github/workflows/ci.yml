@@ -110,5 +110,5 @@ jobs:
           SLACK_WEBHOOK: ${{secrets.SLACK_WEBHOOK}}
           TEXT: ':boom: Deployment for ${GITHUB_REPOSITORY} ${GITHUB_REF_SLUG} failed.
           <https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}| Check the interactive logs on github>.
-          <$DREIPOL_LOGS_URL | Or check the raw logs>''
+          <$DREIPOL_LOGS_URL | Or check the raw logs>'
 
