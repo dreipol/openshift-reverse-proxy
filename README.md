@@ -13,3 +13,5 @@ Deploying this will deploy the reverse proxy of almost all projects on Openshift
 ## Other Proxies:
 * Bertschi: https://github.com/dreipol/openshift-reverse-proxy-bertschi
 * Swico: https://github.com/dreipol/openshift-reverse-proxy-swico
+* Craft: https://github.com/dreipol/openshift-reverse-proxy-craft
+* gttos: https://github.com/dreipol/gttos-server-proxy
