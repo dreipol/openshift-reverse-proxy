@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-set -e
+set -e 
 ./generate_config.sh
-nginx -g 'daemon off;'
+nginx -t

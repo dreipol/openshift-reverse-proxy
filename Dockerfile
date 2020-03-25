@@ -4,8 +4,7 @@ RUN rm -f /etc/nginx/conf.d/default.conf
 COPY default.conf /etc/nginx/conf.d/
 
 RUN mkdir /nginx
-COPY nginx.template /nginx/nginx.template
-COPY start.sh /nginx/start.sh
+COPY nginx.template start.sh test.sh generate_config.sh /nginx/
 RUN chmod 777 -R /nginx
 USER 1001
 WORKDIR /nginx
