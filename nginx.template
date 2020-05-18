@@ -24,7 +24,7 @@ server {
     proxy_set_header X-Request-Start $msec;
     proxy_read_timeout 180s;
 
-    client_max_body_size 64M;
+    client_max_body_size 300M;
 
     location ~ /.well-known/acme-challenge {
         return 200 "OK";
